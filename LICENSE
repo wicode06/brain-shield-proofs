@@ -1,0 +1,23 @@
+Copyright (c) 2026 Walid Rahali — All Rights Reserved.
+
+This repository contains performance and correctness EVIDENCE for the
+Brain-Shield project (benchmark results, methodology description,
+on-chain sample verifications, terminal screenshots).
+
+The following are NOT included in this repository and remain the
+exclusive intellectual property of the author:
+
+  1. The source code of the Brain-Shield decoder (Pipeline B).
+  2. The internal optimization strategy used by Pipeline B.
+  3. The cartel database and the Layer 3 (RL) training pipeline.
+  4. Any model weights, training data, or feature engineering details.
+
+The materials in this repository are provided for transparency and
+verification purposes only. No license — express or implied — is
+granted to copy, redistribute, modify, reverse-engineer, or build
+derivative works from any part of the content.
+
+For licensing, partnership, or grant evaluation inquiries, please
+contact the author directly.
+
+Walid Rahali — Paris, France — 2026
