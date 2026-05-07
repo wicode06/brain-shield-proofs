@@ -202,8 +202,8 @@ strongest captures, with terminal alerts and matching GMGN price-collapse
 charts that are independently verifiable on Solscan.
 
 ### Layer 3 — Cartel Operation Detection
-A pre-existing offline component of the project has indexed **432
-historical cartels** of coordinated wallets from Solana memecoin trade
+A pre-existing offline component of the project has indexed **960
+highly active cartels** of coordinated wallets from Solana memecoin trade
 data, and validated their predictive value on a hold-out set
 (**95% WR on 101 alerted migrations**, offline backtest).
 

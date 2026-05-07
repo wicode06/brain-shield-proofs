@@ -13,7 +13,7 @@ Moonshot, Daos.fun, PumpSwap AMM and any future Solana memecoin launchpad.
 |---|---|---|---|
 | **L1** | LP Withdrawal | Pool creator removes liquidity → price collapses to zero | **Proven** (17h live bench) |
 | **L2** | Coordinated Dump | N wallets sell the same mint in the same slot/blockhash | Prototype running in same bench |
-| **L3** | Cartel Operation | Coordinated wallets pump together, dump together | Detection logic ready (432 cartels indexed) |
+| **L3** | Cartel Operation | Coordinated wallets pump together, dump together | Detection logic ready (960 highly active cartels indexed) |
 
 This proof pack focuses on **Layer 1** (the layer that is already production-validated).
 Layers 2 and 3 are described in the project's full pitch document.
@@ -61,7 +61,7 @@ captures and matching GMGN price-collapse charts.
 
 ## Layer 3 — Cartel Operation Detection
 
-Brain-Shield V0 (offline analysis) has already indexed **432 cartels** of
+Brain-Shield V0 (offline analysis) has already indexed **960 highly active cartels** of
 coordinated wallets from historical Solana memecoin trade data, and
 validated their predictive value on a hold-out set:
 
