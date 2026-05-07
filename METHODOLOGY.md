@@ -11,16 +11,24 @@ under the project's private design documentation.
 
 | Item | Value |
 |---|---|
-| Hardware | Vultr VPS, Frankfurt region |
-| Network distance to Jito relay | ~0.6 ms RTT |
+| Hardware | Local desktop (WSL2 Ubuntu, 8 cores, 27 GB RAM) |
 | Solana feed | Live ShredStream (production data, no replay) |
 | Build profile | Rust release (`cargo build --release`) |
-| Run duration | 16 min 10 s continuous |
-| Total entries processed | 50 000 |
-| Real on-chain withdraws observed | 38 |
+| Run duration | 24 h continuous |
+| Total entries processed | 3 750 000 |
+| Real on-chain withdraws observed | 1 359 |
+| Coordinated-dump events captured (Layer 2) | 2 507 |
 
 No synthetic data, no replay, no warm-up window. The bench connects to a live
 Solana ShredStream relay and processes the actual production feed.
+
+**Note on hardware** — this proof was generated on local commodity hardware
+(WSL2 Ubuntu desktop), not on a dedicated low-latency VPS. The relative
+speedup between Pipeline A and Pipeline B is **invariant to network latency**
+because both pipelines consume the **same input bytes inside the same
+process**. Production deployment on a dedicated Frankfurt VPS (~0.6 ms RTT
+to the Jito relay) is expected to **further improve absolute alert latency**
+to traders, without changing the speedup ratio reported here.
 
 ---
 
@@ -47,9 +55,9 @@ Both pipelines:
 ## 3. Why this design is irrefutable
 
 ### 3.1 Same input
-Both pipelines see byte-for-byte the same 50 000 entries, in the same order,
-in the same process, on the same machine. There is no stream-splitting, no
-broadcast, no network-level sampling that could cause divergent inputs.
+Both pipelines see byte-for-byte the same 3 750 000 entries, in the same
+order, in the same process, on the same machine. There is no stream-splitting,
+no broadcast, no network-level sampling that could cause divergent inputs.
 
 ### 3.2 Same correctness target
 Both pipelines emit a detection record containing the same key fields. The
@@ -57,10 +65,11 @@ two detection sets are diffed at every checkpoint. **Any divergence (a
 withdraw seen by A but not by B, or vice versa) is logged immediately as a
 "DRIFT DETECTED" event in red.**
 
-Across the 16-minute run:
-- Pipeline A detected 15 withdraws.
-- Pipeline B detected 15 withdraws.
-- **Drift = 0 at every checkpoint (10k, 20k, 30k, 40k, 50k entries).**
+Across the 24-hour run:
+- Pipeline A detected 1 359 withdraws.
+- Pipeline B detected 1 359 withdraws.
+- **Drift = 0 at every checkpoint, across 19 consecutive checkpoints
+  (10k → 3.75M entries).**
 
 This is the strongest possible empirical evidence that Pipeline B does not
 sacrifice correctness for speed.
@@ -77,9 +86,9 @@ There is no sub-sampling, no skip-on-error, no fallback path that could bias
 the result toward one pipeline.
 
 ### 3.5 Stability over time
-The same speedup ratio is observed at 5 consecutive checkpoints
-(10k, 20k, 30k, 40k, 50k entries) with a variance of less than 2%. This rules
-out any cache-warm-up artefact, JIT effect, or one-shot lucky measurement.
+The same speedup ratio is observed at **19 consecutive checkpoints over
+24 hours** (variance ≈ 6%, range 72.4× – 77.1×). This rules out any
+cache-warm-up artefact, JIT effect, or one-shot lucky measurement.
 
 ---
 
@@ -111,7 +120,7 @@ We commit to:
   Pipeline B and verify the speedup on their own machine.
 - Providing the captured Solscan transaction signatures so any party can
   validate the semantic correctness of detected withdraws.
-- Publishing the raw stats log (`log_stats.txt`) of the 16-minute run.
+- Publishing the raw stats log of the 24-hour run.
 
 We do **not** commit to disclosing the internal processing strategy of
 Pipeline B at this stage. The strategy is the core IP of Brain-Shield and
@@ -134,4 +143,4 @@ These claims are addressed by separate proof artefacts (see project pitch).
 
 ---
 
-*Methodology version 1.0 — May 5, 2026.*
+*Methodology version 1.1 — May 6, 2026.*
