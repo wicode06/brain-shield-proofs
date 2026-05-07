@@ -24,8 +24,9 @@ Brain-Shield (Layer 1) processes the live Solana ShredStream feed and
 detects pool liquidity withdrawals (rug events) before they finalize
 on-chain.
 
-A side-by-side benchmark was run on a Frankfurt VPS (~0.6 ms to Jito relay)
-comparing two pipelines on the **same** ShredStream input:
+A side-by-side benchmark was run on **local commodity hardware (WSL2 Ubuntu
+desktop)** consuming the live Solana ShredStream feed, comparing two
+pipelines on the **same** input bytes:
 
 - **Pipeline A — baseline** : standard processing path
 - **Pipeline B — Brain-Shield** : optimized processing path
