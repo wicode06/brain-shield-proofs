@@ -2,6 +2,8 @@
 
 **A unified anti-rug shield for Solana memecoin traders, built on Jito ShredStream.**
 
+> 💬 **JIP-Ideas thread** : [forum.jito.network/t/brain-shield-a-defensive-use-case-for-shredstream](https://forum.jito.network/t/brain-shield-a-defensive-use-case-for-shredstream-opt-in-trade-insurance-for-memecoin-holders/938) — community discussion ongoing.
+
 Covers the 3 dominant rug vectors across pump.fun, BONK, LetsBonk, Believe,
 Moonshot, Daos.fun, PumpSwap AMM and any future Solana memecoin launchpad.
 
@@ -38,7 +40,7 @@ Layers 2 and 3 are described in the project's full pitch document.
 | **Speedup** | — | **72.9×** |
 
 - Live Solana ShredStream feed (test machine: WSL2 desktop — production
-  numbers expected to improve on a dedicated Frankfurt VPS).
+  numbers expected to improve on a dedicated Frankfurt bare metal server).
 - **24h continuous run**, 3.75 million entries processed by **both**
   pipelines, no restart, no degradation.
 - 18+ consecutive checkpoints, speedup variance ~6% (72.4× – 77.1×).
