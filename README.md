@@ -5,6 +5,10 @@
 Covers the 3 dominant rug vectors across pump.fun, BONK, LetsBonk, Believe,
 Moonshot, Daos.fun, PumpSwap AMM and any future Solana memecoin launchpad.
 
+![Brain-Shield 24h final benchmark — 3.75M entries, 1359 / 1359 rugs detected, 72.9× speedup](./screenshots/12_paliers_24h_FINAL.png)
+
+> **24h continuous live run on the Solana ShredStream feed — 0 missed rugs out of 1,359 detected, 72.9× faster than the baseline pipeline.**
+
 ---
 
 ## The 3 rug vectors Brain-Shield addresses
@@ -43,6 +47,24 @@ Layers 2 and 3 are described in the project's full pitch document.
 ### Sample on-chain match
 [5aFJw4rN…ftgrM](https://solscan.io/tx/5aFJw4rNWMrhUQmw1NzrduC6Fnvaiy8ZwXBx7MUxC6ZnUxyttdt2qEDygBoYdkuEB8K88fQ8C1a5VepgCrKftgrM)
 
+### Stability across the 24h run — checkpoint trail
+
+The detection speed stays flat from the first 10k entries to the final 3.75M — no warm-up artifact, no drift.
+
+**Final checkpoint — 3.75M entries / 24h continuous run**
+![24h final checkpoint](./screenshots/12_paliers_24h_FINAL.png)
+
+**Late-run checkpoint — 1.37M entries / 8h55**
+![Late run checkpoint](./screenshots/10_paliers_1370k_FINAL.png)
+
+**Mid-run checkpoint — 910k entries / 5h45**
+![Mid run checkpoint](./screenshots/08_paliers_910k.png)
+
+**Early-run checkpoint — 10k → 50k entries**
+![Early run checkpoints](./screenshots/01_paliers_10k_20k.png)
+
+→ Speedup variance over the full run : **72.4× – 77.1×** (~6%, structural).
+
 ---
 
 ## Layer 2 — Coordinated Dump Detection
@@ -56,6 +78,28 @@ in a single block, mathematically impossible by chance).
 
 See **`PITCH_L2.md`** for four detailed case studies with terminal
 captures and matching GMGN price-collapse charts.
+
+### Two illustrated cases
+
+**Case A — TIER 10 (10 wallets sharing the same blockhash on the same mint)**
+
+Brain-Shield terminal alert (the moment 10 distinct wallets were detected dumping `apeos` at the same blockhash) :
+![TIER 10 bundle sell — apeos](./screenshots/L2_02_bundle_sell_tier10.png)
+
+GMGN price chart at the same moment — the dump bundle is the vertical wick :
+![apeos chart collapse](./screenshots/L2_01_chart_apeos_dump.png)
+
+---
+
+**Case B — TIER ≥15 (15+ wallets sharing the same blockhash, mathematically impossible by chance)**
+
+Brain-Shield terminal alert :
+![TIER 15 bundle sell — master](./screenshots/L2_04_bundle_sell_tier15.png)
+
+GMGN price chart at the same moment :
+![master chart collapse](./screenshots/L2_03_chart_master_dump.png)
+
+→ The detection fires **as the dump bundle hits the slot**, not after the price has collapsed. Two more cases (`solmaxxing`, `party`) are in `PITCH_L2.md` and the `screenshots/` folder.
 
 ---
 
