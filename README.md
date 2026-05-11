@@ -1,4 +1,4 @@
-# Brain-Shield — Public Proof Pack
+ # Brain-Shield — Public Proof Pack
 
   **A unified anti-rug shield for Solana memecoin traders, built on Jito ShredStream.**
 
@@ -19,7 +19,7 @@
 
   | Layer | Rug vector | What it does | Status |
   |---|---|---|---|
-  | **L1** | LP Withdrawal | Pool creator removes liquidity → price collapses to zero | **Proven** (17h live bench) |
+  | **L1** | LP Withdrawal | Pool creator removes liquidity → price collapses to zero | **Proven** (24h live bench) |
   | **L2** | Coordinated Dump | N wallets sell the same mint in the same slot/blockhash | Prototype running in same bench |
   | **L3** | Cartel Operation | Coordinated wallets pump together, dump together | Detection logic ready (960 highly active cartels indexed) |
 
@@ -48,7 +48,7 @@
   - 18+ consecutive checkpoints, speedup variance ~6% (72.4× – 77.1×).
   - 1 359 real on-chain withdrawals captured, every one matched on Solscan.
 
-  ### Sample on-chain matches (5 of 869)
+  ### Sample on-chain matches (5 of 1 359)
 
   Every event below was extracted **automatically from the raw ShredStream feed**, before the transaction was finalized. Click any link to verify on Solscan that the `Withdraw` instruction targets the Pump.fun
    AMM program (`pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA`) with the pool/signer captured by Brain-Shield.
@@ -179,7 +179,7 @@
      Brain-Shield extracted from the raw ShredStream feed — they should
      match exactly.
 
-  The full set of 869 captured rugs is available to grant evaluators under
+  The full set of 1 359 captured rugs is available to grant evaluators under
   confidentiality. The performance side (3.75M entries, 18 checkpoints,
   72.9× speedup) is reproducible by running both pipelines on the same
   ShredStream feed for 24h — methodology in [`METHODOLOGY.md`](./METHODOLOGY.md).
