@@ -211,3 +211,116 @@ Layer 3 ships the cartel database and the matching logic in the
 ShredStream pipeline so cartels are detected as they enter a token,
 not after the fact. Implementation details and the cartel database are
 part of the project's private IP.
+
+---
+
+## Addendum (May 13, 2026) — Empirical proof: why BAM is structurally necessary for Phase 2
+
+Brain-Shield Phase 1 (detection + alert) is shippable today on standard Solana
+infrastructure — the 24h benchmark above proves it.
+
+**Phase 2 (guaranteed defensive exit) is not.** The data below shows that the
+current Solana ordering primitive cannot deliver a defensive-exit guarantee
+*at any tip price*, and that the BAM Pre-Drain Exit Lane (JIP-28) is therefore
+the only path forward.
+
+### Test setup
+
+On **Feb 11, 2026**, **five confirmed rug events** were used as live targets for
+defensive SELL transactions submitted via Jito bundles from
+wallet `5TzqrdTfzvHyrkozzXiTu1fpxCzwE7U6cAvDPdf4M3ix`.
+
+Each defensive SELL was:
+- **Triggered** by Brain-Shield ShredStream detection — measured live at
+  **0.36 ms – 1.00 ms** end-to-end (shred reception → Jito bundle submission)
+  on three separate captures (see `detection_latency_logs.md`)
+- **Pre-signed** to minimize submission latency
+- **Submitted** as a Jito bundle with a Jito tip ranging from $0.08 to $114.26
+
+### Five same-slot duels — on-chain ledger
+
+| # | Slot | Pool | Rugger Jito tip | Defensive tip | Fee ratio | Intra-slot gap | Defensive TX |
+|---|---|---|---:|---:|---:|---:|---|
+| 1 | 399 553 989 | WSOL-Frieren | **$0.00** | $0.08 | 80× | **+849 after rug** | ❌ FAILED |
+| 2 | 399 566 241 | WSOL-axiomlana | **$0.00** | $0.80 | 320× | **+544 after rug** | ❌ FAILED |
+| 3 | 399 600 905 | WSOL-RHINO | **$0.00** | $0.80 | 320× | **+322 after rug** | ❌ FAILED |
+| 4 | 399 601 537 | WSOL-Coco #1 | **$0.00** | $0.80 | 320× | **+1 083 after rug** | ❌ FAILED |
+| 5 | **399 602 711** | **WSOL-Coco #2** | **$0.00** | **$114.26** | **9 600×** | **+268 after rug** | ❌ FAILED |
+
+All five: the rugger paid **zero Jito tip**, the defensive exit paid up to
+1.2 SOL ($114) — up to **9 600× the rugger's total fee** — still landed
+**behind** the drain in the same slot, hit `DivisionByZero (6025)` in
+`pump-amm/src/curve/fees.rs:21`.
+
+This rules out both common counter-arguments:
+- **Latency was not the bottleneck.** Sub-millisecond detection-to-submission
+  was reproducibly measured at 0.36 ms (Rug #228, slot 399 536 358), 0.95 ms
+  (Rug #74, slot 399 553 989) and 1.00 ms end-to-end (slot 399 566 241).
+- **Tip economics did not move the needle.** Slot 399 602 711 paid 9 600×
+  the rugger's fee. Same result.
+
+### Slot 399 602 711 — the case that closes the argument
+
+| | Rugger | Defensive exit |
+|---|---|---|
+| Signer | `GrWU5WgmSb5cEoKqW1qRxxr37SqQbsuuTztajPxzyePR` | `5TzqrdTfzvHyrkozzXiTu1fpxCzwE7U6cAvDPdf4M3ix` |
+| TX | `3tSjCauuUK9rupCKeZCipKk3JLwrXdBEaqHePwvJMQ6gYhR1g3A4BNqwEx1EaBCtLENzXHSTdFsUKu9P9UwYU4zC` | `xBWLPCECPnivsuPuzT3gvAyStsKHVJtCyGYeYMkugF6iAJvFMiJcraNb7WsMEoM3MubuvrDHFSXFo44n2tiAZJT` |
+| Action | Withdraw 159.17 SOL + 536 368 787 Coco + burn 291 530 LP | SELL Coco for WSOL |
+| Position in slot | **870 / 1 168** | **1 138 / 1 168** |
+| Jito tip | **0 SOL** | **1.2 SOL ($114.26)** |
+| Priority fee | 0.000 12 SOL | 0.000 25 SOL |
+| Total fee | 0.000 245 SOL (~$0.01) | 1.200 255 SOL (~$114.27) |
+| Status | ✅ Success | ❌ `DivisionByZero` (6025) |
+
+- **Fee ratio: 9 600×.** The defensive exit paid 9 600 times the rugger's fee.
+  The rugger won the ordering.
+- **Same slot, same bundle pool, same scheduler.** The rugger landed at
+  position 870; the defensive exit at position 1 138 — 268 positions later.
+- **Ten other PumpSwap TXs failed** in this same slot, including five
+  consecutive retries by another defensive bot
+  (`HELL1Hso...` positions 832 → 983).
+
+### Why this directly maps to BAM (JIP-28)
+
+The current Solana ordering primitive is a **Veblen good** : paying more
+does not guarantee priority, it only buys inclusion. This is fine for general
+MEV, but it is **structurally unfit for defensive exits**, where ordering
+*is* the product.
+
+| Solution | Verdict |
+|---|---|
+| Higher Jito tip | ❌ Proven insufficient — $114 still landed behind a $0 rug |
+| Direct TPU to leader | ⚠️ Leader-dependent, no cross-leader guarantee |
+| Slot-before submission | ⚠️ Needs > 1-slot early signal, breaks against same-slot bundle rugs |
+| Frontrun bundle (rug + SELL together) | ❌ Impossible — cannot include another wallet's TX |
+| **BAM Pre-Drain Exit Lane (plugin)** | ✅ **The only structural fix** |
+
+BAM Pre-Drain Exit Lane addresses this at the plugin layer:
+- A plugin scheduler can recognize defensive SELL intents and **enforce
+  ordering before pool-state-mutating instructions** within the same slot.
+- This is not new MEV — it is **negative-MEV protection**, exactly the kind
+  of public good BAM is meant to enable.
+- It complements **JIP-15 (MEV Blacklist)** by adding a positive guarantee on
+  top of the negative one : blacklist removes the worst extractors, Exit Lane
+  gives victims a structural escape.
+
+### Impact — the hidden victim count
+
+Across these five rugs, after subtracting identified cartel wallets (rugger
++ coordinated dumpers), an **estimated ~1 800 holders** held the token at
+rug-time with sincere positions large enough to warrant a defensive exit.
+
+Under the current Solana ordering primitive, **0 of them** could have exited
+successfully — the scheduler placed every defensive intent behind the drainer,
+regardless of tip or latency.
+
+Under **BAM Pre-Drain Exit Lane**, all ~1 800 would have had a structural
+escape. The demand for a defensive-exit guarantee is already there, on-chain,
+today.
+
+### Reproducibility
+
+Full data, scripts and Solscan links :
+[github.com/wicode06/brain-shield-proofs](https://github.com/wicode06/brain-shield-proofs).
+
+All transaction signatures above are independently verifiable on Solscan.
